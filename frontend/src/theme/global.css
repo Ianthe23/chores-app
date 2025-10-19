@@ -1,0 +1,481 @@
+/* Global Styles */
+
+/* Custom gradient backgrounds */
+.gradient-bg {
+  background: linear-gradient(
+    135deg,
+    var(--ion-color-gradient-start) 0%,
+    var(--ion-color-gradient-end) 100%
+  );
+}
+
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--ion-color-gradient-start) 0%,
+    var(--ion-color-gradient-end) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Modern card styles */
+.modern-card {
+  border-radius: var(--ion-border-radius-large);
+  box-shadow: var(--ion-box-shadow);
+  border: none;
+  background: var(--ion-background-color);
+  transition: all 0.3s ease;
+}
+
+.modern-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ion-box-shadow-large);
+}
+
+/* Modern button styles */
+.modern-button {
+  --border-radius: var(--ion-border-radius);
+  --box-shadow: var(--ion-box-shadow);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.025em;
+}
+
+.modern-button.button-gradient {
+  --background: linear-gradient(
+    135deg,
+    var(--ion-color-gradient-start) 0%,
+    var(--ion-color-gradient-end) 100%
+  );
+  --color: white;
+}
+
+/* Modern input styles */
+.modern-input {
+  --border-radius: var(--ion-border-radius);
+  --background: var(--ion-color-light);
+  --color: var(--ion-text-color);
+  --placeholder-color: var(--ion-color-medium);
+  --border-color: transparent;
+  --highlight-color: var(--ion-color-primary);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Modern list styles */
+.modern-list {
+  background: transparent;
+}
+
+.modern-list-item {
+  --background: var(--ion-background-color);
+  --border-radius: var(--ion-border-radius);
+  --box-shadow: var(--ion-box-shadow);
+  --inner-padding-end: 16px;
+  --inner-padding-start: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  margin: 8px 16px;
+  border-radius: var(--ion-border-radius);
+}
+
+/* Modern header styles */
+.modern-header {
+  --background: transparent;
+  --color: var(--ion-text-color);
+  --border-color: transparent;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.modern-header.header-gradient {
+  --background: linear-gradient(
+    135deg,
+    var(--ion-color-gradient-start) 0%,
+    var(--ion-color-gradient-end) 100%
+  );
+  --color: white;
+}
+
+/* Modern toolbar styles */
+.modern-toolbar {
+  --background: transparent;
+  --color: inherit;
+  --border-color: transparent;
+}
+
+/* Modern tab bar styles */
+.modern-tab-bar {
+  --background: var(--ion-background-color);
+  --color: var(--ion-color-medium);
+  --color-selected: var(--ion-color-primary);
+  border-top: 1px solid var(--ion-color-light);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Modern fab styles */
+.modern-fab {
+  --background: linear-gradient(
+    135deg,
+    var(--ion-color-gradient-start) 0%,
+    var(--ion-color-gradient-end) 100%
+  );
+  --color: white;
+  --box-shadow: var(--ion-box-shadow-large);
+  --border-radius: 16px;
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Status indicators */
+.status-pending {
+  --background: var(--ion-color-warning);
+  --color: white;
+}
+
+.status-in-progress {
+  --background: var(--ion-color-tertiary);
+  --color: white;
+}
+
+.status-completed {
+  --background: var(--ion-color-success);
+  --color: white;
+}
+
+/* Clickable status chip styles */
+ion-chip[style*="cursor: pointer"] {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+ion-chip[style*="cursor: pointer"]:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+
+ion-chip[style*="cursor: pointer"]:active {
+  transform: scale(0.95);
+}
+
+/* Add a subtle indicator that status chips are clickable */
+ion-chip[style*="cursor: pointer"]::after {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* Priority indicators */
+.priority-low {
+  --background: var(--ion-color-medium);
+  --color: white;
+}
+
+.priority-medium {
+  --background: var(--ion-color-warning);
+  --color: white;
+}
+
+.priority-high {
+  --background: var(--ion-color-danger);
+  --color: white;
+}
+
+/* Mobile-responsive chip styling */
+@media (max-width: 768px) {
+  ion-chip {
+    font-size: 0.75rem;
+    height: auto;
+    min-height: 24px;
+    padding: 4px 8px;
+    margin: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+  }
+  
+  ion-chip ion-label {
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Ensure chip containers don't overflow */
+  .chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    overflow: hidden;
+  }
+}
+
+/* Glass morphism effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--ion-border-radius-large);
+}
+
+/* Dark mode specific styles */
+@media (prefers-color-scheme: dark) {
+  .glass-card {
+    background: rgba(30, 41, 59, 0.3);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+}
+
+/* Fix text visibility in popups and modals */
+ion-select-popover,
+ion-popover,
+ion-modal,
+ion-alert {
+  --color: var(--ion-text-color) !important;
+  --background: var(--ion-background-color) !important;
+}
+
+ion-select-popover ion-item,
+ion-popover ion-item,
+ion-modal ion-item,
+ion-alert ion-item {
+  --color: var(--ion-text-color) !important;
+  --background: var(--ion-background-color) !important;
+}
+
+ion-select-popover ion-radio,
+ion-popover ion-radio,
+ion-modal ion-radio,
+ion-alert ion-radio {
+  --color: var(--ion-text-color) !important;
+}
+
+ion-select-popover ion-label,
+ion-popover ion-label,
+ion-modal ion-label,
+ion-alert ion-label {
+  color: var(--ion-text-color) !important;
+}
+
+/* Fix IonSelect option text visibility */
+ion-select-option {
+  --color: var(--ion-text-color) !important;
+}
+
+/* Fix alert text visibility */
+.alert-wrapper {
+  --color: var(--ion-text-color) !important;
+  --background: var(--ion-background-color) !important;
+}
+
+.alert-head {
+  color: var(--ion-text-color) !important;
+}
+
+.alert-message {
+  color: var(--ion-text-color) !important;
+}
+
+.alert-button {
+  color: var(--ion-color-primary) !important;
+}
+
+/* Fix datetime picker text visibility */
+ion-datetime {
+  --color: var(--ion-text-color) !important;
+  --background: var(--ion-background-color) !important;
+}
+
+/* Ensure proper contrast in dark mode */
+@media (prefers-color-scheme: dark) {
+  ion-select-popover,
+  ion-popover,
+  ion-modal,
+  ion-alert {
+    --color: #f1f5f9 !important;
+    --background: #1e293b !important;
+  }
+
+  ion-select-popover ion-item,
+  ion-popover ion-item,
+  ion-modal ion-item,
+  ion-alert ion-item {
+    --color: #f1f5f9 !important;
+    --background: #1e293b !important;
+  }
+
+  ion-select-popover ion-label,
+  ion-popover ion-label,
+  ion-modal ion-label,
+  ion-alert ion-label {
+    color: #f1f5f9 !important;
+  }
+}
+
+/* Profile Page Styles */
+.profile-content {
+  --background: var(--background-gradient);
+}
+
+.profile-card .profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  --border-radius: 50%;
+  --background: var(--gradient-primary);
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+}
+
+.profile-info h2 {
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.profile-info p {
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats-card .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--card-background);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.stat-item ion-icon {
+  font-size: 1.5rem;
+}
+
+.stat-item h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-item p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.completion-rate {
+  margin-top: 20px;
+}
+
+.completion-rate p {
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.settings-card ion-list {
+  background: transparent;
+}
+
+.settings-card ion-item {
+  --background: transparent;
+  --border-color: var(--border-color);
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+.actions-card {
+  margin-bottom: 20px;
+}
