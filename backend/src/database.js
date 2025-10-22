@@ -47,6 +47,7 @@ export const initDatabase = async () => {
         status TEXT DEFAULT 'pending',
         priority TEXT DEFAULT 'medium',
         due_date DATETIME,
+        points INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
@@ -60,6 +61,15 @@ export const initDatabase = async () => {
       // Column might already exist, ignore error
       if (!error.message.includes('duplicate column name')) {
         console.log('Status column migration note:', error.message);
+      }
+    }
+
+    // Add points column to existing tables (migration)
+    try {
+      await db.runAsync(`ALTER TABLE chores ADD COLUMN points INTEGER DEFAULT 0`);
+    } catch (error) {
+      if (!error.message.includes('duplicate column name')) {
+        console.log('Points column migration note:', error.message);
       }
     }
 

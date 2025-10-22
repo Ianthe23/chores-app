@@ -237,6 +237,9 @@ const ChoreList: React.FC = () => {
                       <IonChip color={getPriorityColor(chore.priority)}>
                         <IonLabel>{chore.priority}</IonLabel>
                       </IonChip>
+                      <IonChip color="medium">
+                        <IonLabel>{chore.points} pts</IonLabel>
+                      </IonChip>
                       {chore.due_date && (
                         <IonChip color="tertiary">
                           <IonIcon

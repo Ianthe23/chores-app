@@ -1,4 +1,5 @@
-const userConnections = new Map();
+const userConnections = new Map(); // Map<userId, Set<WebSocket>>
+const wsUser = new Map(); // Map<WebSocket, userId>
 
 export const setupWebSocket = (wss) => {
   wss.on("connection", (ws, req) => {
@@ -9,8 +10,24 @@ export const setupWebSocket = (wss) => {
         const data = JSON.parse(message);
 
         if (data.type === "AUTH" && data.userId) {
-          userConnections.set(data.userId, ws);
-          console.log(`👤 User ${data.userId} connected via WebSocket`);
+          // If ws was previously authenticated to another user, remove it
+          const prevUserId = wsUser.get(ws);
+          if (prevUserId && prevUserId !== data.userId) {
+            const prevSet = userConnections.get(prevUserId);
+            if (prevSet) prevSet.delete(ws);
+          }
+
+          let connections = userConnections.get(data.userId);
+          if (!connections) {
+            connections = new Set();
+            userConnections.set(data.userId, connections);
+          }
+          connections.add(ws);
+          wsUser.set(ws, data.userId);
+
+          console.log(
+            `👤 User ${data.userId} connected via WebSocket (tabs: ${connections.size})`
+          );
         }
       } catch (error) {
         console.error("WebSocket message error:", error);
@@ -18,13 +35,19 @@ export const setupWebSocket = (wss) => {
     });
 
     ws.on("close", () => {
-      // Remove user connection
-      for (const [userId, connection] of userConnections.entries()) {
-        if (connection === ws) {
-          userConnections.delete(userId);
-          console.log(`👤 User ${userId} disconnected from WebSocket`);
-          break;
+      const userId = wsUser.get(ws);
+      if (userId) {
+        const connections = userConnections.get(userId);
+        if (connections) {
+          connections.delete(ws);
+          if (connections.size === 0) {
+            userConnections.delete(userId);
+          }
+          console.log(
+            `👤 User ${userId} disconnected from WebSocket (remaining tabs: ${connections.size})`
+          );
         }
+        wsUser.delete(ws);
       }
     });
 
@@ -35,9 +58,13 @@ export const setupWebSocket = (wss) => {
 };
 
 export const broadcastToUser = (userId, message) => {
-  const connection = userConnections.get(userId);
-  if (connection && connection.readyState === 1) {
-    // WebSocket.OPEN
-    connection.send(JSON.stringify(message));
+  const connections = userConnections.get(userId);
+  if (!connections) return;
+
+  const payload = JSON.stringify(message);
+  for (const ws of connections) {
+    if (ws.readyState === 1) {
+      ws.send(payload);
+    }
   }
 };

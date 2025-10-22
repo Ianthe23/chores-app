@@ -5,6 +5,7 @@ export interface Chore {
   status: 'pending' | 'in-progress' | 'completed';
   priority: 'low' | 'medium' | 'high';
   due_date?: string;
+  points: number;
   created_at: string;
   updated_at: string;
   user_id: number;
@@ -15,6 +16,7 @@ export interface CreateChoreRequest {
   description?: string;
   priority: 'low' | 'medium' | 'high';
   due_date?: string;
+  points?: number;
 }
 
 export interface UpdateChoreRequest {
@@ -23,4 +25,5 @@ export interface UpdateChoreRequest {
   status?: 'pending' | 'in-progress' | 'completed';
   priority?: 'low' | 'medium' | 'high';
   due_date?: string;
+  points?: number;
 }

@@ -168,6 +168,7 @@ router.post("/", async (req, res) => {
       priority = "medium",
       due_date,
       status = "pending",
+      points = 0,
     } = req.body;
 
     if (!title) {
@@ -175,11 +176,21 @@ router.post("/", async (req, res) => {
     }
 
     const completed = status === "completed";
+    const pointsValue = Number.isFinite(Number(points)) ? Number(points) : 0;
 
     const result = await db.runAsync(
-      `INSERT INTO chores (user_id, title, description, priority, due_date, status, completed) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [req.user.id, title, description, priority, due_date, status, completed]
+      `INSERT INTO chores (user_id, title, description, priority, due_date, status, completed, points) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        req.user.id,
+        title,
+        description,
+        priority,
+        due_date,
+        status,
+        completed,
+        pointsValue,
+      ]
     );
 
     const newChore = await db.getAsync("SELECT * FROM chores WHERE id = ?", [
@@ -278,8 +289,15 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, completed, status, priority, due_date } =
-      req.body;
+    const {
+      title,
+      description,
+      completed,
+      status,
+      priority,
+      due_date,
+      points,
+    } = req.body;
 
     // Check if chore belongs to user
     const existingChore = await db.getAsync(
@@ -309,15 +327,21 @@ router.put("/:id", async (req, res) => {
       description:
         description !== undefined ? description : existingChore.description,
       completed:
-        completedValue !== undefined ? completedValue : existingChore.completed,
+        completedValue !== undefined ? completedValue : existingChor.completed,
       status: statusValue !== undefined ? statusValue : existingChore.status,
       priority: priority !== undefined ? priority : existingChore.priority,
       due_date: due_date !== undefined ? due_date : existingChore.due_date,
+      points:
+        points !== undefined
+          ? Number.isFinite(Number(points))
+            ? Number(points)
+            : existingChore.points
+          : existingChore.points,
     };
 
     await db.runAsync(
       `UPDATE chores 
-       SET title = ?, description = ?, completed = ?, status = ?, priority = ?, due_date = ?, updated_at = CURRENT_TIMESTAMP
+       SET title = ?, description = ?, completed = ?, status = ?, priority = ?, due_date = ?, points = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ? AND user_id = ?`,
       [
         updateData.title,
@@ -326,6 +350,7 @@ router.put("/:id", async (req, res) => {
         updateData.status,
         updateData.priority,
         updateData.due_date,
+        updateData.points,
         id,
         req.user.id,
       ]

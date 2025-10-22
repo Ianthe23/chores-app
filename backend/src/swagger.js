@@ -72,6 +72,10 @@ const options = {
               format: "date-time",
               description: "Due date",
             },
+            points: {
+              type: "integer",
+              description: "Effort points for the chore",
+            },
             createdAt: {
               type: "string",
               format: "date-time",

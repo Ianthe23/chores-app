@@ -66,6 +66,7 @@ const ChoreDetail: React.FC = () => {
   );
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [dueDate, setDueDate] = useState<string>("");
+  const [points, setPoints] = useState<number>(0);
 
   const isNewChore = id === "new";
 
@@ -85,6 +86,13 @@ const ChoreDetail: React.FC = () => {
     }
   }, [id, getChoreById, isNewChore]);
 
+  useEffect(() => {
+    // when loading an existing chore, hydrate points
+    if (!isNewChore && chore) {
+      setPoints(chore.points ?? 0);
+    }
+  }, [isNewChore, chore]);
+
   const handleSave = async () => {
     if (!title.trim()) {
       setToastMessage("Title is required");
@@ -99,6 +107,7 @@ const ChoreDetail: React.FC = () => {
         description: description.trim() || undefined,
         priority,
         due_date: dueDate || undefined,
+        points: Number.isFinite(Number(points)) ? Number(points) : 0,
         ...(isNewChore ? {} : { status }),
       };
 
@@ -213,6 +222,24 @@ const ChoreDetail: React.FC = () => {
                     value={title}
                     onIonInput={(e) => setTitle(e.detail.value!)}
                     placeholder="Enter chore title"
+                  />
+                </IonItem>
+
+                <IonItem
+                  className="modern-input"
+                  lines="none"
+                  style={{ marginTop: "16px" }}
+                >
+                  <IonLabel position="stacked">Points</IonLabel>
+                  <IonInput
+                    type="number"
+                    value={String(points)}
+                    onIonInput={(e) => {
+                      const v = Number(e.detail.value);
+                      setPoints(Number.isFinite(v) ? v : 0);
+                    }}
+                    placeholder="e.g. 3"
+                    inputmode="numeric"
                   />
                 </IonItem>
 
@@ -351,6 +378,9 @@ const ChoreDetail: React.FC = () => {
                   <IonChip color={getPriorityColor(chore.priority)}>
                     <IonIcon icon={flagOutline} />
                     <IonLabel>{chore.priority} priority</IonLabel>
+                  </IonChip>
+                  <IonChip color="medium">
+                    <IonLabel>{chore.points} pts</IonLabel>
                   </IonChip>
                 </div>
               </IonCardHeader>

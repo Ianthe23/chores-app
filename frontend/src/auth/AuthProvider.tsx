@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { authApi } from './authApi';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { authApi } from "./authApi";
+import { connectWebSocket, closeWebSocket } from "../wsClient";
 
 interface User {
   id: number;
@@ -20,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -35,12 +36,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    
+    const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
+      // Connect only after explicit login/register; no auto connect here
+      // connectWebSocket(parsed.id);
     }
     setIsLoading(false);
   }, []);
@@ -49,12 +52,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await authApi.login(username, password);
       const { user: userData, token: userToken } = response.data;
-      
+
       setUser(userData);
       setToken(userToken);
-      
-      localStorage.setItem('token', userToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem("token", userToken);
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      connectWebSocket(userData.id); // connect after login
     } catch (error) {
       throw error;
     }
@@ -64,12 +68,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await authApi.register(username, password);
       const { user: userData, token: userToken } = response.data;
-      
+
       setUser(userData);
       setToken(userToken);
-      
-      localStorage.setItem('token', userToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem("token", userToken);
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      connectWebSocket(userData.id); // connect after register
     } catch (error) {
       throw error;
     }
@@ -78,8 +83,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    closeWebSocket();
   };
 
   const value = {
@@ -88,12 +94,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
-    isLoading
+    isLoading,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
