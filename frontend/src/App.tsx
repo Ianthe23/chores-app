@@ -1,6 +1,7 @@
 import { Redirect, Route } from "react-router-dom";
 import { IonApp, IonRouterOutlet, setupIonicReact } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
+import { NetworkProvider } from "./network/NetworkProvider";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -42,27 +43,42 @@ setupIonicReact({
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
-      <AuthProvider>
-        <IonRouterOutlet>
-          <Route path="/login" component={Login} exact={true} />
-          <Route path="/register" component={Register} exact={true} />
-          <ChoreProvider>
-            <PrivateRoute
-              path="/dashboard"
-              component={Dashboard}
-              exact={true}
+      <NetworkProvider>
+        <AuthProvider>
+          <IonRouterOutlet>
+            <Route path="/login" component={Login} exact={true} />
+            <Route path="/register" component={Register} exact={true} />
+            <ChoreProvider>
+              <PrivateRoute
+                path="/dashboard"
+                component={Dashboard}
+                exact={true}
+              />
+              <PrivateRoute path="/chores" component={ChoreList} exact={true} />
+              <PrivateRoute
+                path="/chore/:id"
+                component={ChoreDetail}
+                exact={true}
+              />
+              <PrivateRoute path="/profile" component={Profile} exact={true} />
+            </ChoreProvider>
+            {/* Root redirect based on auth state */}
+            <Route
+              exact
+              path="/"
+              render={() => {
+                // lightweight inline auth check
+                const savedUser = localStorage.getItem("user");
+                return savedUser ? (
+                  <Redirect to="/dashboard" />
+                ) : (
+                  <Redirect to="/login" />
+                );
+              }}
             />
-            <PrivateRoute path="/chores" component={ChoreList} exact={true} />
-            <PrivateRoute
-              path="/chore/:id"
-              component={ChoreDetail}
-              exact={true}
-            />
-            <PrivateRoute path="/profile" component={Profile} exact={true} />
-          </ChoreProvider>
-          <Route exact path="/" render={() => <Redirect to="/login" />} />
-        </IonRouterOutlet>
-      </AuthProvider>
+          </IonRouterOutlet>
+        </AuthProvider>
+      </NetworkProvider>
     </IonReactRouter>
   </IonApp>
 );

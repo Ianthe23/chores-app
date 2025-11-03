@@ -41,9 +41,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     if (savedToken && savedUser) {
       setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-      // Connect only after explicit login/register; no auto connect here
-      // connectWebSocket(parsed.id);
+      const parsed = JSON.parse(savedUser);
+      setUser(parsed);
+      // Auto-connect WS if resuming a session
+      connectWebSocket(parsed.id);
     }
     setIsLoading(false);
   }, []);

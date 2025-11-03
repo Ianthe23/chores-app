@@ -20,14 +20,21 @@ const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
 // Security middleware
-app.use(helmet());
 app.use(
   cors({
-    origin: [
-      process.env.FRONTEND_URL || "http://localhost:5173",
-      "http://localhost:3000", // Allow Swagger docs
-      "http://localhost:8100", // Allow default Ionic port
-    ],
+    origin: (origin, callback) => {
+      // Allow all in development to support ngrok/mobile testing
+      if (process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+      const allowed = [
+        process.env.FRONTEND_URL || "http://localhost:5173",
+        "http://localhost:3000",
+        "http://localhost:8100",
+      ];
+      if (!origin || allowed.includes(origin)) return callback(null, true);
+      return callback(new Error("CORS not allowed"), false);
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

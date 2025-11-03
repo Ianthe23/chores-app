@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   IonContent,
   IonHeader,
@@ -23,6 +23,11 @@ import {
   IonTabButton,
   IonSpinner,
   IonAlert,
+  IonSelect,
+  IonSelectOption,
+  IonGrid,
+  IonRow,
+  IonCol,
 } from "@ionic/react";
 import {
   listOutline,
@@ -37,18 +42,77 @@ import {
 import { useChores } from "../chores/ChoreProvider";
 import { useHistory } from "react-router-dom";
 import { format } from "date-fns";
+import NetworkStatus from "../components/NetworkStatus";
 
 const ChoreList: React.FC = () => {
-  const { chores, fetchChores, deleteChore, updateChore, isLoading } =
-    useChores();
+  const {
+    chores,
+    fetchChores,
+    deleteChore,
+    updateChore,
+    isLoading,
+    page,
+    hasMore,
+  } = useChores();
   const [searchText, setSearchText] = useState("");
   const [selectedSegment, setSelectedSegment] = useState("all");
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [choreToDelete, setChoreToDelete] = useState<number | null>(null);
   const history = useHistory();
 
+  // Responsive filter: dropdown on small screens, 2x2 grid otherwise
+  const [useDropdown, setUseDropdown] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 480px)");
+    const handler = (e: MediaQueryListEvent | { matches: boolean }) => {
+      setUseDropdown((e as any).matches);
+    };
+    setUseDropdown(mq.matches);
+    mq.addEventListener("change", handler as any);
+    return () => mq.removeEventListener("change", handler as any);
+  }, []);
+
+  // Initial fetch on mount
+  useEffect(() => {
+    fetchChores(1, {
+      status:
+        selectedSegment === "all"
+          ? undefined
+          : (selectedSegment as "pending" | "in-progress" | "completed"),
+      q: searchText.trim() || undefined,
+    });
+  }, []);
+
+  // Refetch when filter changes
+  useEffect(() => {
+    fetchChores(1, {
+      status:
+        selectedSegment === "all"
+          ? undefined
+          : (selectedSegment as "pending" | "in-progress" | "completed"),
+      q: searchText.trim() || undefined,
+    });
+  }, [selectedSegment]);
+
+  // Refetch when search changes (basic immediate update; can debounce if preferred)
+  useEffect(() => {
+    fetchChores(1, {
+      status:
+        selectedSegment === "all"
+          ? undefined
+          : (selectedSegment as "pending" | "in-progress" | "completed"),
+      q: searchText.trim() || undefined,
+    });
+  }, [searchText]);
+
   const handleRefresh = async (event: CustomEvent) => {
-    await fetchChores();
+    await fetchChores(page, {
+      status:
+        selectedSegment === "all"
+          ? undefined
+          : (selectedSegment as "pending" | "in-progress" | "completed"),
+      q: searchText.trim() || undefined,
+    });
     event.detail.complete();
   };
 
@@ -110,7 +174,13 @@ const ChoreList: React.FC = () => {
 
     try {
       await updateChore(choreId, { status: newStatus });
-      await fetchChores(); // Refresh the list
+      await fetchChores(page, {
+        status:
+          selectedSegment === "all"
+            ? undefined
+            : (selectedSegment as "pending" | "in-progress" | "completed"),
+        q: searchText.trim() || undefined,
+      });
     } catch (error) {
       console.error("Failed to update status:", error);
     }
@@ -121,11 +191,18 @@ const ChoreList: React.FC = () => {
       <IonHeader className="modern-header">
         <IonToolbar className="modern-toolbar">
           <IonTitle>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <IonIcon icon={listOutline} />
-              My Chores
+              Chores
             </div>
           </IonTitle>
+          <div slot="end" style={{ paddingRight: 8 }}>
+            <NetworkStatus
+              unsyncedCount={
+                JSON.parse(localStorage.getItem("chore_outbox") || "[]").length
+              }
+            />
+          </div>
         </IonToolbar>
       </IonHeader>
 
@@ -154,25 +231,104 @@ const ChoreList: React.FC = () => {
             </p>
           </IonText>
 
-          {/* Filter Segment */}
-          <IonSegment
-            value={selectedSegment}
-            onIonChange={(e) => setSelectedSegment(e.detail.value as string)}
-            className="ion-margin-vertical"
+          {useDropdown ? (
+            <IonItem
+              className="modern-input"
+              lines="none"
+              style={{ marginTop: 8 }}
+            >
+              <IonLabel>Filter</IonLabel>
+              <IonSelect
+                value={selectedSegment}
+                onIonChange={(e) => setSelectedSegment(e.detail.value)}
+                interface="action-sheet"
+              >
+                <IonSelectOption value="all">All</IonSelectOption>
+                <IonSelectOption value="pending">Pending</IonSelectOption>
+                <IonSelectOption value="in-progress">
+                  In Progress
+                </IonSelectOption>
+                <IonSelectOption value="completed">Completed</IonSelectOption>
+              </IonSelect>
+            </IonItem>
+          ) : (
+            <div style={{ padding: "0 16px", marginTop: 8 }}>
+              <IonGrid fixed>
+                <IonRow>
+                  <IonCol size="6">
+                    <IonButton
+                      expand="block"
+                      fill={selectedSegment === "all" ? "solid" : "outline"}
+                      onClick={() => setSelectedSegment("all")}
+                    >
+                      All
+                    </IonButton>
+                  </IonCol>
+                  <IonCol size="6">
+                    <IonButton
+                      expand="block"
+                      fill={selectedSegment === "pending" ? "solid" : "outline"}
+                      onClick={() => setSelectedSegment("pending")}
+                    >
+                      Pending
+                    </IonButton>
+                  </IonCol>
+                </IonRow>
+                <IonRow>
+                  <IonCol size="6">
+                    <IonButton
+                      expand="block"
+                      fill={
+                        selectedSegment === "in-progress" ? "solid" : "outline"
+                      }
+                      onClick={() => setSelectedSegment("in-progress")}
+                    >
+                      In Progress
+                    </IonButton>
+                  </IonCol>
+                  <IonCol size="6">
+                    <IonButton
+                      expand="block"
+                      fill={
+                        selectedSegment === "completed" ? "solid" : "outline"
+                      }
+                      onClick={() => setSelectedSegment("completed")}
+                    >
+                      Completed
+                    </IonButton>
+                  </IonCol>
+                </IonRow>
+              </IonGrid>
+            </div>
+          )}
+        </div>
+
+        {/* Pagination controls */}
+        <div
+          className="ion-padding"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <IonButton
+            color="medium"
+            disabled={isLoading || page <= 1}
+            onClick={() => fetchChores(page - 1)}
           >
-            <IonSegmentButton value="all">
-              <IonLabel>All</IonLabel>
-            </IonSegmentButton>
-            <IonSegmentButton value="pending">
-              <IonLabel>Pending</IonLabel>
-            </IonSegmentButton>
-            <IonSegmentButton value="in-progress">
-              <IonLabel>In Progress</IonLabel>
-            </IonSegmentButton>
-            <IonSegmentButton value="completed">
-              <IonLabel>Completed</IonLabel>
-            </IonSegmentButton>
-          </IonSegment>
+            Previous
+          </IonButton>
+
+          <IonText>Page {page}</IonText>
+
+          <IonButton
+            color="primary"
+            disabled={isLoading || !hasMore}
+            onClick={() => fetchChores(page + 1)}
+          >
+            Next
+          </IonButton>
         </div>
 
         {/* Chore List */}

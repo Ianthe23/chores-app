@@ -66,13 +66,47 @@ const normalizeChoreData = (chore) => {
  */
 router.get("/", async (req, res) => {
   try {
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 5, 1), 100);
+    const offset = (page - 1) * limit;
+
+    const { status, q } = req.query;
+    const validStatuses = ["pending", "in-progress", "completed"];
+    const hasStatus = status && validStatuses.includes(status);
+    const hasQuery = typeof q === "string" && q.trim().length > 0;
+
+    let where = "user_id = ?";
+    const params = [req.user.id];
+
+    if (hasStatus) {
+      where += " AND status = ?";
+      params.push(status);
+    }
+
+    if (hasQuery) {
+      where += " AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)";
+      const term = `%${q.toLowerCase()}%`;
+      params.push(term, term);
+    }
+
+    const countRow = await db.getAsync(
+      `SELECT COUNT(*) as total FROM chores WHERE ${where}`,
+      params
+    );
+    const total = countRow?.total || 0;
+
     const chores = await db.allAsync(
-      "SELECT * FROM chores WHERE user_id = ? ORDER BY created_at DESC",
-      [req.user.id]
+      `SELECT * FROM chores WHERE ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
     );
 
     const normalizedChores = chores.map(normalizeChoreData);
-    res.json(normalizedChores);
+    res.json({
+      items: normalizedChores,
+      total,
+      page,
+      limit,
+    });
   } catch (error) {
     console.error("Get chores error:", error);
     res.status(500).json({ error: "Failed to fetch chores" });

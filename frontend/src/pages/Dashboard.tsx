@@ -39,6 +39,7 @@ import { useChores } from "../chores/ChoreProvider";
 import { useAuth } from "../auth/AuthProvider";
 import { useHistory } from "react-router-dom";
 import { format, isToday, isTomorrow, isPast } from "date-fns";
+import NetworkStatus from "../components/NetworkStatus";
 
 const Dashboard: React.FC = () => {
   const { chores, fetchChores, isLoading } = useChores();
@@ -84,6 +85,14 @@ const Dashboard: React.FC = () => {
               Dashboard
             </div>
           </IonTitle>
+          <div slot="end" style={{ paddingRight: 8 }}>
+            {/* Replace the require(...) usage with the imported component */}
+            <NetworkStatus
+              unsyncedCount={
+                JSON.parse(localStorage.getItem("chore_outbox") || "[]").length
+              }
+            />
+          </div>
         </IonToolbar>
       </IonHeader>
 
